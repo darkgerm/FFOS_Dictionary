@@ -97,7 +97,6 @@ var lookup_update = function(word, callback) {
         //  $('br').remove();
         
         $('.resultbox').each(function(idx, elem) {
-            console.log($(this));
             var html = $(this).html();
             html = html.replace(/<br>/g, '\n');
             html = html.trim();
@@ -108,6 +107,39 @@ var lookup_update = function(word, callback) {
         });
     });
 }
+
+
+//==================== localStorage ====================
+
+/** Favorite format: A JSON list, ordered by alphabeta.
+ex:
+    '["at","cat","category"]'
+*/
+var favorite_init = function() {
+    var fav = localStorage.getItem('favorite');
+    
+    if(DEBUG) fav=null;
+    
+    if(fav==null) {
+        localStorage.setItem('favorite', '[]');
+    }
+};
+
+var favorite_add = function(word) {
+    var fav = favorite_get();
+    //assume hist is already init.
+    
+    if(fav.indexOf(word) == -1) {
+        //haven't add, add it
+        fav.push(word);
+        fav.sort();
+    }
+    localStorage.setItem('favorite', JSON.stringify(fav));
+};
+
+var favorite_get = function() {
+    return JSON.parse(localStorage.getItem('favorite'));
+};
 
 
 //==================== DOM events ====================
@@ -126,8 +158,14 @@ $('#lookup').on('input', function() {
 
 $('#fav-save').click(function() {
     var word = $('#lookup').val();
-    console.log(word);
-    console.log($('#means').html());
+    console.log('saving: ', word);
+    favorite_add(word);
+});
+
+$('#fav-show').click(function() {
+    var a = favorite_get();
+    console.log(a);
+    $('#means').html(a);
 });
 
 $(window).resize(function() {
@@ -140,6 +178,7 @@ $(window).resize(function() {
 $(function main() {
     
     change_orientation();
+    favorite_init();
     
     if(DEBUG) {
         console.warn('In debug mode.');
