@@ -6,7 +6,7 @@ You should run the following command before testing::
 
     word='<WORD_FOR_TESTING>' && wget -O debug/$word.html "http://cdict.info/wwwcdict.php?word=$word"
 */
-var DEBUG = 0;
+var DEBUG = 1;
 
 
 
@@ -68,8 +68,8 @@ var lookup_update = function(word, callback) {
     var params = {word: word};
     
     if(DEBUG) {
-        url = '/debug/' + word + '.html';
-        params = {};
+        url = '/cdict';
+        params = {word: word};
     }
     
     openurl(url, params, 'GET', function(data) {

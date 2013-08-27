@@ -1,32 +1,31 @@
 {
-  "name": "Dictionary",
-  "description": "A web base English-Chinese Dictionary.",
-  "version": "1.0",
-  "type": "privileged",
-  "launch_path": "/index.html",
-  "developer": {
-    "name": "darkgerm",
-    "url": ""
-  },
-  "locales": {
-    "en": {
-      "name": "Dictionary",
-      "description": "A web base English-Chinese Dictionary."
-    },
-    "zh-TW": {
-      "name": "字典",
-      "description": "線上英漢/漢英字典"
-    }
-  },
-  "default_locale": "en-US",
-  "icons": {
-    "128": "/img/128.png",
-    "60": "/img/60.png"
-  },
+    "name": "Dictionary",
+    "description": "A web base English-Chinese Dictionary.",
+    "version": "1.0",
+    "type": "web",
+    "launch_path": "/index.html",
+    "installs_allowed_from": [
+        "*"
+    ],
 
-  "permissions": {
-    "systemXHR": {
-      "description": "Allow you to access web dictionary."
+    "developer": {
+        "name": "darkgerm",
+        "url": ""
+    },
+    "locales": {
+        "en": {
+            "name": "Dictionary",
+            "description": "A web base English-Chinese Dictionary."
+        },
+        "zh-TW": {
+            "name": "字典",
+            "description": "線上英漢/漢英字典"
+        }
+    },
+    "default_locale": "en-US",
+    "icons": {
+        "128": "/img/128.png",
+        "60": "/img/60.png"
     }
-  }
 }
+
