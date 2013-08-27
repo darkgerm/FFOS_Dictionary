@@ -130,9 +130,20 @@ $('#fav-show').click(function() {
     $('#means').html(a);
 });
 
-
 $('#play').click(function() {
     new Audio('http://cdict.info/enwave.php?'+sound_id).play();
+});
+
+$('#font-add').click(function() {
+    var fs = parseInt($('body').css('font-size'));
+    fs += 5;
+    $('body').css('font-size', fs+'px');
+});
+
+$('#font-minus').click(function() {
+    var fs = parseInt($('body').css('font-size'));
+    fs -= 5;
+    $('body').css('font-size', fs+'px');
 });
 
 $(window).resize(function() {
