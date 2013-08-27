@@ -1,34 +1,37 @@
 #!/usr/bin/env python2
-import SimpleHTTPServer
+from SimpleHTTPServer import SimpleHTTPRequestHandler as HTTPHandler
 import SocketServer
 import urllib2
 import re
 import sys
 
-SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map['.webapp'] = 'application/x-web-app-manifest+json'
-
-
-#return urllib2.urlopen(url + "?" + urllib.urlencode(params))
+HTTPHandler.extensions_map['.webapp'] = 'application/x-web-app-manifest+json'
 
 def cdic_proxy(word):
     url = 'http://cdict.info/wwwcdict.php'
     return urllib2.urlopen(url + "?word=" + word).read()
  
 
-class Handler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class Handler(HTTPHandler):
     def do_GET(self, *args, **kwargs):
-        req = self.requestline.split()[1]   # query string
-        reobj = re.search(r'/cdict\?word=(.*)', req)
+        path = self.path
+        reobj = re.search(r'/cdict\?word=(.*)', path)
         if reobj:
             print reobj.group(1)
             self.wfile.write(cdic_proxy(reobj.group(1)))
         else:
-            SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self, *args, **kwargs)
+            HTTPHandler.do_GET(self, *args, **kwargs)
             
 
-if __name__=='__main__':
-    port = int(sys.argv[1])
+def main():
+    try:
+        port = int(sys.argv[1])
+    except:
+        port = 8000
     httpd = SocketServer.TCPServer(("", port), Handler)
     print 'Serving HTTP on 0.0.0.0 port', port, '...'
     httpd.serve_forever()
+
+
+if __name__=='__main__': main()
 
