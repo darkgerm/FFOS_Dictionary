@@ -7,15 +7,15 @@ import sys
 
 HTTPHandler.extensions_map['.webapp'] = 'application/x-web-app-manifest+json'
 
-def cdic_proxy(word):
-    url = 'http://cdict.info/wwwcdict.php'
-    return urllib2.urlopen(url + "?word=" + word).read()
+def cdic_proxy(params):
+    url = 'http://cdict.info/'
+    return urllib2.urlopen(url + params).read()
  
 
 class Handler(HTTPHandler):
     def do_GET(self, *args, **kwargs):
         path = self.path
-        reobj = re.search(r'/cdict\?word=(.*)', path)
+        reobj = re.search(r'/cdict/(.*)', path)
         if reobj:
             print reobj.group(1)
             self.wfile.write(cdic_proxy(reobj.group(1)))

@@ -1,57 +1,7 @@
 'use strict';
 
-/** 
-To avoid Same Origin Policy, set this flag up for testing.
-You should run the following command before testing::
-
-    word='<WORD_FOR_TESTING>' && wget -O debug/$word.html "http://cdict.info/wwwcdict.php?word=$word"
-*/
-var DEBUG = 1;
-
-
-
-//==================== util functions ====================
-var openurl = function(url, params, method, callback) {
-    if(typeof params === 'undefined') params = {};
-    if(typeof method === 'undefined') method = 'GET';
-    
-    var xhr = new XMLHttpRequest({
-        mozSystem: true
-    });
-     
-    var qs = [];
-    for(var key in params)  {
-        qs.push(encodeURIComponent(key)+'='+encodeURIComponent(params[key]));
-    }
-    var url_full = url + '?' + qs.join('&');
-
-    xhr.open(method, url_full, true);
-    //xhr.responseType = 'html';
-    xhr.timeout = 30000;
-    xhr.onload = function(e) {
-        if (xhr.status === 200 || xhr.status === 400 || xhr.status === 0) {
-            if(typeof callback === 'function') {
-                window.setTimeout(function() {
-                    callback(xhr.response);
-                }, 0);
-            }
-        }
-        else {
-            console.error('[openurl] error with status = ', xhr.status);
-        }
-    }; // onload
-
-    xhr.ontimeout = function(e) {
-        console.error('[openurl] ontimeout', e);
-    }; // ontimeout
-
-    xhr.onerror = function(e) {
-        console.error('[openurl] onerror', e);
-    }; // onerror
-
-    xhr.send();
-}
-
+var DEBUG = 0;
+var sound_id = '';
 
 //==================== other funcs ====================
 
@@ -64,16 +14,25 @@ var change_orientation = function() {
 }
 
 var lookup_update = function(word, callback) {
-    var url = 'http://cdict.info/wwwcdict.php';
+    var url = '/cdict/wwwcdict.php';
     var params = {word: word};
     
-    if(DEBUG) {
-        url = '/cdict';
-        params = {word: word};
-    }
-    
-    openurl(url, params, 'GET', function(data) {
+    $.ajax({
+        type: 'GET',
+        url: url,
+        data: params,
+    })
+    .done(function(data) {
         var rbox = $(data).find('.resultbox');
+        
+        var reobj = rbox.html().match(/javascript:play\('([^']*)'\)/);
+        if(reobj != null) {
+            sound_id = reobj[1];
+            console.log(sound_id);
+        }else{
+            console.log("can't play");
+        }
+        
         $('#means').html(rbox);
         $('.xbox, .bartop').remove();
         
@@ -105,6 +64,9 @@ var lookup_update = function(word, callback) {
             html = html.replace(/\n/g, '<br>');
             $(this).html(html);
         });
+    })
+    .error(function() {
+        $('#means').html("Can't connect to Internet.");
     });
 }
 
@@ -166,6 +128,11 @@ $('#fav-show').click(function() {
     var a = favorite_get();
     console.log(a);
     $('#means').html(a);
+});
+
+
+$('#play').click(function() {
+    new Audio('http://cdict.info/enwave.php?'+sound_id).play();
 });
 
 $(window).resize(function() {
