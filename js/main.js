@@ -1,17 +1,9 @@
 'use strict';
 
 var DEBUG = 0;
-var sound_id = '';
+var sound_dom = null;
 
-//==================== other funcs ====================
-
-var change_orientation = function() {
-    //set $('#lookup').outerWidth(true) == 100%
-    $('#lookup').width($('body').width()-6);
-    
-    //set $('means').outerHeight(true) + $('#lookup').outerHeight(true) == 100%
-    $('#means').height($('body').height()-$('#lookup').outerHeight(true));
-}
+//==================== lookup main ====================
 
 var lookup_update = function(word, callback) {
     var url = '/cdict/wwwcdict.php';
@@ -25,35 +17,29 @@ var lookup_update = function(word, callback) {
     .done(function(data) {
         var rbox = $(data).find('.resultbox');
         
+        //find and load the sound
         var reobj = rbox.html().match(/javascript:play\('([^']*)'\)/);
         if(reobj != null) {
-            sound_id = reobj[1];
-            console.log(sound_id);
+            var sound_id = reobj[1];
+            sound_dom = new Audio('http://cdict.info/enwave.php?'+sound_id);
+            $('#play').attr('active', 'true');
         }else{
-            console.log("can't play");
+            sound_dom = null;
+            $('#play').attr('active', 'false');
         }
         
-        $('#means').html(rbox);
+        $('#content').html(rbox);
         $('.xbox, .bartop').remove();
-        
-        //  //re-css the html
-        //  var html = $('#means').html();
-        //  
-        //  // header
-        //  html = html.replace(/(〈[^〉]*〉)/g, '<h1>$1</h1>');
-        //  
-        //  // classify
-        //  html = html.replace(/(\[[^\]]*\])/g, '<div class="classify">$1</div>');
-        //  html = html.replace(/(〔[^〕]*〕)/g, '<div class="classify">$1</div>');
-        //  
-        //  // type
-        //  html = html.replace(/(【[^】]*】)/g, '<div class="type">$1</div>');
-        //  
-        //  // level-1 means
-        //  html = html.replace(/<br>\d/g, '<div class="level-1">$1</div>');
-        //  
-        //  $('#means').html(html);
-        //  $('br').remove();
+        if(rbox.html().match(/找不到相關中英文資料/)) {
+            $('#content').html(
+                '<div class="resultbox"><center>找不到相關中英文資料</center><div>'
+            );
+        }
+        if(rbox.html().match(/找不到相關片語資料/)) {
+            $('#content').html(
+                '<div class="resultbox"><center>找不到相關片語資料</center><div>'
+            );
+        }
         
         $('.resultbox').each(function(idx, elem) {
             var html = $(this).html();
@@ -66,7 +52,9 @@ var lookup_update = function(word, callback) {
         });
     })
     .error(function() {
-        $('#means').html("Can't connect to Internet.");
+        $('#content').html("Can't connect to Internet.");
+        sound_dom = null;
+        $('#play').attr('active', 'false');
     });
 }
 
@@ -87,6 +75,10 @@ var favorite_init = function() {
     }
 };
 
+var favorite_get = function() {
+    return JSON.parse(localStorage.getItem('favorite'));
+};
+
 var favorite_add = function(word) {
     var fav = favorite_get();
     //assume hist is already init.
@@ -99,52 +91,118 @@ var favorite_add = function(word) {
     localStorage.setItem('favorite', JSON.stringify(fav));
 };
 
-var favorite_get = function() {
-    return JSON.parse(localStorage.getItem('favorite'));
+var favorite_del = function(word) {
+    var fav = favorite_get();
+    var idx = fav.indexOf(word);
+    if(idx != -1) {
+        fav.splice(idx, 1);
+        localStorage.setItem('favorite', JSON.stringify(fav));
+    }
+    gen_fav_list();
 };
+
+var gen_fav_list = function() {
+    $('#fav-list').html('');
+    $.each(favorite_get(), function(i,v) {
+        var html = '<li onclick="lookup_update(\''+v+'\');" >'
+            + '<div class="del" onclick="favorite_del(\''+v+'\')">X</div>'
+            + v + '</li>'
+        $('#fav-list').append(html);
+    });
+}
 
 
 //==================== DOM events ====================
 
 var lookup_id;
-
 $('#lookup').on('input', function() {
+    window.clearTimeout(lookup_id);
+    $('#fav-add').attr('active', 'false');
+    
     var word = $('#lookup').val();
     
-    window.clearTimeout(lookup_id);
+    //when input return empty
+    if(word == '') {
+        $('#content').html('');
+        sound_dom = null;
+        $('#play').attr('active', 'false');
+        return;
+    }
+    
     lookup_id = window.setTimeout(function() {
+    
         lookup_update(word);
+        if(favorite_get().indexOf(word) == -1) {
+            $('#fav-add').attr('active', 'true');
+        }
+        
     }, 1000); //1 sec
 });
 
-
-$('#fav-save').click(function() {
-    var word = $('#lookup').val();
-    console.log('saving: ', word);
-    favorite_add(word);
+var menu_state = 0;  /* 0:hide 1:show */
+$('#menu').click(function() {
+    if(menu_state == 0) {           //show
+        menu_state = 1;
+        $('#menu').css('border-style', 'inset');
+        
+    }else{                          //hide
+        menu_state = 0;
+        $('#menu').css('border-style', 'outset');
+    }
+    $('#menu-list').slideToggle('slow');
 });
 
+var fav_state = 0;
 $('#fav-show').click(function() {
-    var a = favorite_get();
-    console.log(a);
-    $('#means').html(a);
+    if(fav_state == 0) {           //show
+        fav_state = 1;
+        $('#fav-show').css('border-style', 'inset');
+        
+    }else{                          //hide
+        fav_state = 0;
+        $('#fav-show').css('border-style', 'outset');
+    }
+    $('#fav-list').slideToggle('slow');
 });
+
+
+$('#fav-add').click(function() {
+    var word = $('#lookup').val();
+    if(word == '') return;  //do not save empty
+    
+    favorite_add(word);
+    $('#fav-add').attr('active', 'false');
+    gen_fav_list();
+});
+
+
 
 $('#play').click(function() {
-    new Audio('http://cdict.info/enwave.php?'+sound_id).play();
+    if(sound_dom) sound_dom.play();
 });
 
+
+var font_resize = function(delta) {
+    var percent = parseInt($('#font-size').html());
+    percent += delta;
+    if(percent < 50 || 200 < percent) return;
+    $('#font-size').html(percent+'%');
+    $('#content').css('font-size', percent+'%');
+};
+
 $('#font-add').click(function() {
-    var fs = parseInt($('body').css('font-size'));
-    fs += 5;
-    $('body').css('font-size', fs+'px');
+    font_resize(10);
 });
 
 $('#font-minus').click(function() {
-    var fs = parseInt($('body').css('font-size'));
-    fs -= 5;
-    $('body').css('font-size', fs+'px');
+    font_resize(-10);
 });
+
+
+var change_orientation = function() {
+    //set $('#content').outerHeight(true) + $('#lookup').outerHeight(true) == 100%
+    $('#content').height($('body').height()-$('#lookup').outerHeight(true));
+}
 
 $(window).resize(function() {
     change_orientation();
@@ -157,6 +215,7 @@ $(function main() {
     
     change_orientation();
     favorite_init();
+    gen_fav_list();
     
     if(DEBUG) {
         console.warn('In debug mode.');

@@ -10,17 +10,28 @@
 
   <body>
   
+    <div class="header-bg">
+        <div id="fav-add" class="header-btn" active="false">加入最愛</div>
+        <div id="fav-show" class="header-btn">顯示最愛</div>
+        <input type="text" id="lookup" placeholder="請輸入要查詢的單字" />
+        <div id="play" class="header-btn" active="false">播放</div>
+        <div id="menu" class="header-btn">選項</div>
+    </div>
     
-    <input type="text" id="lookup" />
-    <button id="fav-save">save</button>
-    <button id="fav-show">show</button>
-    <button id="play">play</button>
-    <button id="font-add">+</button>
-    <button id="font-minus">-</button>
+    <ul class="float-list" id="menu-list">
+        <li>字體
+            <span class="font-resize" id="font-add">+</span>
+            <span class="font-resize" id="font-size">100%</span>
+            <span class="font-resize" id="font-minus">-</span>
+        </li>
+        <li>關於</li>
+    </ul>
     
-    <div id="test" class="media-icon camera"></div>
+    <ul class="float-list" id="fav-list">
+    </ul>
     
-    <div id="means"></div>
+    
+    <div id="content"></div>
     
     <!-- javascript -->
     <script type="text/javascript" src="js/jquery-2.0.3.min.js" defer></script>
