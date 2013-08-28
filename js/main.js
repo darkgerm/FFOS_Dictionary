@@ -120,6 +120,8 @@ $('#lookup').on('input', function() {
     $('#fav-add').attr('active', 'false');
     
     var word = $('#lookup').val();
+    word = decodeURI(word);
+    $('#lookup').val(word);
     
     //when input return empty
     if(word == '') {
