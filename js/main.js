@@ -5,10 +5,37 @@ var sound_dom = null;
 
 //==================== lookup main ====================
 
-var lookup_update = function(word, callback) {
+var lookup_update = function(word) {
+    /** lookup word from cdict and update #lookup */
+    
     var url = '/cdict/wwwcdict.php';
     var params = {word: word};
     
+    // do nothing if word is empty
+    if(word == '') {
+        $('#content').html('');
+        sound_dom = null;
+        $('#play').attr('active', 'false');
+        return;
+    }
+    
+    // always change favorite-state
+    if(favorite_get().indexOf(word) == -1) {
+        $('#fav-add').attr('active', 'true');
+    }else{
+        $('#fav-add').attr('active', 'false');
+    }
+    
+    // if fav-list is show, hide it
+    if(fav_state == 1) {
+        fav_state = 0;
+        $('#fav-show').css('border-style', 'outset');
+        $('#fav-list').slideToggle('slow');
+        $('#lookup').val(word);
+    }
+    
+    
+    // lookup from cdict
     $.ajax({
         type: 'GET',
         url: url,
@@ -56,7 +83,8 @@ var lookup_update = function(word, callback) {
         sound_dom = null;
         $('#play').attr('active', 'false');
     });
-}
+    
+};
 
 
 //==================== localStorage ====================
@@ -123,21 +151,8 @@ $('#lookup').on('input', function() {
     word = decodeURI(word);
     $('#lookup').val(word);
     
-    //when input return empty
-    if(word == '') {
-        $('#content').html('');
-        sound_dom = null;
-        $('#play').attr('active', 'false');
-        return;
-    }
-    
     lookup_id = window.setTimeout(function() {
-    
         lookup_update(word);
-        if(favorite_get().indexOf(word) == -1) {
-            $('#fav-add').attr('active', 'true');
-        }
-        
     }, 1000); //1 sec
 });
 
