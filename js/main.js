@@ -229,6 +229,15 @@ $('#font-minus').click(function() {
 
 
 var change_orientation = function() {
+    //let #lookup fill up space.
+    var all_width = $('.header-bg').width();
+    var btn_width = 0;
+    $.each($('.header-btn'), function() {
+        btn_width += $(this).outerWidth(true);
+    });
+    var lookup_side = $('#lookup').outerWidth(true) - $('#lookup').width();
+    $('#lookup').width(all_width - btn_width - lookup_side);
+    
     //set $('#content').outerHeight(true) + $('#lookup').outerHeight(true) == 100%
     $('#content').height($('body').height()-$('#lookup').outerHeight(true));
 }
