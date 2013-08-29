@@ -138,11 +138,16 @@ var gen_fav_list = function() {
     
     $.each(favorite_get(), function(i,v) {
         var html = '<li onclick="lookup_update(\''+v+'\');" >'
-            + '<div class="del" onclick="favorite_del(\''+v+'\')">X</div>'
+            + '<div class="del" word="'+v+'">X</div>'
             + v + '</li>'
         $('#fav-list').append(html);
     });
-}
+    
+    $('div[word]').click(function(e) {
+        favorite_del($(this).attr('word'));
+        e.stopPropagation();
+    });
+};
 
 
 //==================== DOM events ====================
