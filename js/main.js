@@ -131,6 +131,11 @@ var favorite_del = function(word) {
 
 var gen_fav_list = function() {
     $('#fav-list').html('');
+    
+    if(favorite_get().length == 0) {
+        $('#fav-list').append('<li>目前無任何單字</li>');
+    }
+    
     $.each(favorite_get(), function(i,v) {
         var html = '<li onclick="lookup_update(\''+v+'\');" >'
             + '<div class="del" onclick="favorite_del(\''+v+'\')">X</div>'
