@@ -34,6 +34,8 @@ var lookup_update = function(word) {
         $('#lookup').val(word);
     }
     
+    // loading page
+    $('#content').html('<h2><center>Loading ...</center></h2>');
     
     // lookup from cdict
     $.ajax({
