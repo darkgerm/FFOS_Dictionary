@@ -128,7 +128,8 @@ var favorite_del = function(word) {
         fav.splice(idx, 1);
         localStorage.setItem('favorite', JSON.stringify(fav));
     }
-    gen_fav_list();
+    $('li[word="'+word+'"]').slideUp();
+    //gen_fav_list();
 };
 
 var gen_fav_list = function() {
@@ -139,7 +140,7 @@ var gen_fav_list = function() {
     }
     
     $.each(favorite_get(), function(i,v) {
-        var html = '<li onclick="lookup_update(\''+v+'\');" >'
+        var html = '<li word="'+v+'" onclick="lookup_update(\''+v+'\');" >'
             + '<div class="del" word="'+v+'">X</div>'
             + v + '</li>'
         $('#fav-list').append(html);
